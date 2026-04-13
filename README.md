@@ -14,11 +14,19 @@ Gitee link for RoboMaster SDK download: https://gitee.com/xitinglin/RoboMaster-S
 
 This fork targets **CPython 3.14 and newer**.
 
+PyPI distribution name: **`robomaster-sdk-modern`**.
+
 The original DJI repository was built around Python 3.6-3.8 era tooling. This fork updates the package metadata, runtime compatibility, and media-extension build path for modern interpreters.
 
 ## Source installation
 
-Install the SDK from a local checkout:
+Install from PyPI:
+
+```bash
+python -m pip install robomaster-sdk-modern
+```
+
+Install from a local checkout:
 
 ```bash
 python -m pip install .
@@ -50,3 +58,15 @@ Build prerequisites for source installs with media support:
 - Replaced `audioop` usage with a NumPy-based PCM resampler because `audioop` was removed in Python 3.13.
 - Replaced `netifaces` and `netaddr` subnet discovery with `psutil` plus the standard library.
 - Updated package minimums to versions that publish Python 3.14-compatible wheels.
+
+## Release workflow
+
+`pyproject.toml` is now the canonical build metadata for the forked distribution.
+
+Build and upload with:
+
+```bash
+python -m pip install .[release]
+python -m build
+python -m twine upload dist/*
+```

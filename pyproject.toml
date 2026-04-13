@@ -1,3 +1,60 @@
 [build-system]
 requires = ["setuptools>=82", "wheel>=0.45"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "robomaster-sdk-modern"
+description = "Community-maintained DJI RoboMaster Python SDK fork with Python 3.14+ support"
+readme = "README.md"
+requires-python = ">=3.14"
+license = {text = "Apache License 2.0"}
+authors = [
+  {name = "RoboMaster SDK Community Fork"}
+]
+keywords = ["dji", "robomaster", "sdk", "robot", "drone"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Human Machine Interfaces",
+]
+dependencies = [
+  "numpy>=2.3.4",
+  "opencv-python>=4.13.0.92",
+  "psutil>=7.2.2",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+qrcode = ["MyQR>=2.3.1"]
+release = [
+  "build>=1.2.2.post1",
+  "twine>=6.1.0",
+]
+
+[project.urls]
+Homepage = "https://robomaster-dev.rtfd.io/"
+Documentation = "https://robomaster-dev.rtfd.io/"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+robomaster = ["LICENSE.txt", "README.md"]
+
+[tool.setuptools.dynamic]
+version = {attr = "robomaster.version.__version__"}
+
+[tool.robomaster_release]
+distribution = "robomaster-sdk-modern"
+build = "python -m build"
+upload = "python -m twine upload dist/*"
+test_upload = "python -m twine upload --repository testpypi dist/*"

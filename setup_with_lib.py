@@ -107,16 +107,16 @@ if platform.system() == "Windows":
 
 
 setup(
-    name='robomaster',
+    name='robomaster-sdk-modern',
     version=version,
-    description="RoboMaster Python SDK",
+    description="Community-maintained RoboMaster Python SDK fork for Python 3.14+",
     long_description=__doc__,
     long_description_content_type="text/markdown",
     author='EDU SDK TEAM',
     license='Apache License, Version 2.0',
     zip_safe=True,
     keywords='dji robomaster sdk robot drone'.split(),
-    url="http://www.robomaster.com",
+    url="https://robomaster-dev.rtfd.io/",
     python_requires=">=3.14",
     package_dir={'': 'src'},
     packages=find_packages('src'),
