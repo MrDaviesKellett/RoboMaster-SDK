@@ -180,18 +180,18 @@ class Action(metaclass=_AutoRegisterAction):
         :param timeout: 超时，在timeout前未完成任务动作，直接返回
         :return: bool: 动作在指定时间内完成，返回True; 动作超时返回False
         """
-        if self._event.isSet() and self.is_completed:
+        if self._event.is_set() and self.is_completed:
             return True
 
         if timeout:
             self._event.wait(timeout)
-            if not self._event.isSet():
+            if not self._event.is_set():
                 logger.warning("Action: wait_for_completed timeout.")
                 self._changeto_state(ACTION_EXCEPTION)
                 return False
         else:
             self._event.wait()
-            if not self._event.isSet():
+            if not self._event.is_set():
                 logger.warning("Action: wait_for_completed timeout.")
                 self._changeto_state(ACTION_EXCEPTION)
                 return False

@@ -31,6 +31,14 @@ else:
     _MEDIA_CODEC_IMPORT_ERROR = None
 
 
+def _clear_queue(q):
+    while True:
+        try:
+            q.get_nowait()
+        except queue.Empty:
+            break
+
+
 class LiveView(object):
 
     def __init__(self, robot):
@@ -101,16 +109,16 @@ class LiveView(object):
     def stop_video_stream(self):
         try:
             self._video_streaming = False
+            was_displaying = self._displaying
             self._displaying = False
             if self._video_stream_conn:
                 self._video_stream_conn.disconnect()
-            if self._displaying:
-                if self._video_display_thread:
-                    self._video_frame_queue.put(None)
-                    self._video_display_thread.join()
+            if was_displaying and self._video_display_thread:
+                self._video_frame_queue.put(None)
+                self._video_display_thread.join()
             if self._video_decoder_thread:
                 self._video_decoder_thread.join()
-            self._video_frame_queue.queue.clear()
+            _clear_queue(self._video_frame_queue)
         except Exception as e:
             logger.error("LiveView: disconnect exception {0}".format(e))
             return False
@@ -204,7 +212,7 @@ class LiveView(object):
             if self._audio_decoder_thread:
                 self._audio_decoder_thread.join()
             self._audio_stream_conn.disconnect()
-            self._video_frame_queue.queue.clear()
+            _clear_queue(self._audio_frame_queue)
             # make sure the robot is disconnected
             time.sleep(0.5)
         except Exception as e:

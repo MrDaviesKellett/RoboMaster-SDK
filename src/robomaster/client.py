@@ -92,7 +92,7 @@ class Client(object):
         try:
             return self._conn.target_addr
         except Exception:
-            raise print('Robot: Can not connect to robot, check connection please.')
+            raise RuntimeError('Robot: Can not connect to robot, check connection please.')
 
     def add_handler(self, obj, name, f):
         self._dispatcher.add_handler(obj, name, f)
@@ -159,7 +159,7 @@ class Client(object):
                 return None
             self.send_msg(msg)
             evt._event.wait(timeout)
-            if not evt._event.isSet():
+            if not evt._event.is_set():
                 logger.error("Client: send_sync_msg wait msg receiver:{0}, cmdset:0x{1:02x}, cmdid:0x{2:02x} \
 timeout!".format(msg.receiver, msg.cmdset, msg.cmdid))
                 evt._valid = False
@@ -379,7 +379,7 @@ class TextClient(object):
         self.send_msg(msg)
         self._wait_ack_mutex.release()
         self._event.wait(timeout)
-        if self._event.isSet():
+        if self._event.is_set():
             self._event.clear()
             self._wait_ack_mutex.acquire()
             self._has_cmd_wait_ack = False

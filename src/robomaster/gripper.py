@@ -60,7 +60,7 @@ class Gripper(module.Module):
         super().__init__(robot)
 
     def reset(self):
-        pass
+        return self.pause()
 
     def open(self, power=50):
         """ 控制机械爪张开

@@ -56,7 +56,7 @@ class RobotGroupBase(object):
         return self._all_robots_dict
 
     def _scan_group_module(self):
-        pass
+        raise NotImplementedError("RobotGroupBase._scan_group_module must be implemented by subclasses.")
 
     def get_group_module(self, name):
         """Get group module by name
@@ -224,7 +224,7 @@ class RMGroup(RobotGroupBase):
         :param sound_id:
         :return:
         """
-        final_result = False
+        final_result = True
         for robot_id in self._robots_id_in_group_list:
             result = self._all_robots_dict[robot_id].play_sound(
                 sound_id, times)
@@ -283,11 +283,12 @@ class SingleDroneInGroup(multi_module.TelloAction):
         self._dispatcher.action_host_list = [self._robot_host]
 
     def close(self):
-        pass
+        self.event.set()
+        self._dispatcher.action_host_list = []
 
     def send_command(self, command):
         self.event.wait(10)
-        if self.event.isSet():
+        if self.event.is_set():
             logger.info("execute command：{}".format(command))
             proto = tool.TelloProtocol(command, self._robot_host)
             self._client.send(proto)
@@ -299,7 +300,11 @@ class SingleDroneInGroup(multi_module.TelloAction):
 
 class TelloGroup(RobotGroupBase):
 
-    def __init__(self, client, robot_id_group_list, _robot_id_dict={}, _robot_host_dict={}):
+    def __init__(self, client, robot_id_group_list, _robot_id_dict=None, _robot_host_dict=None):
+        if _robot_id_dict is None:
+            _robot_id_dict = {}
+        if _robot_host_dict is None:
+            _robot_host_dict = {}
         super().__init__(robot_id_group_list, _robot_id_dict)
         self._robot_host_dict = _robot_host_dict
         self._robot_group_host_list = []

@@ -100,7 +100,7 @@ class RoboticArm(module.Module):
         self._action_dispatcher = robot.action_dispatcher
 
     def reset(self):
-        pass
+        return self.recenter()
 
     def recenter(self):
         """ 控制机械臂回中

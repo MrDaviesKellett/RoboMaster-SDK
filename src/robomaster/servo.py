@@ -171,7 +171,7 @@ class Servo(module.Module):
         proto = protocol.ProtoServoGetAngle()
         proto._id = (index << 5) + 0x19
         msg = protocol.Msg(self._client.hostbyte, self._host, proto)
-        print(proto)
+        logger.debug("Servo: get_angle proto %s", proto)
         try:
             resp_msg = self._client.send_sync_msg(msg)
             if resp_msg:

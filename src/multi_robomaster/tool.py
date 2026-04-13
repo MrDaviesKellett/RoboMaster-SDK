@@ -255,6 +255,8 @@ class TelloClient(object):
     def __init__(self):
         self._conn = TelloConnection()
         self.queue = queue.Queue()
+        self.queue_lock = threading.Lock()
+        self._scan_complete = threading.Event()
         self.receive_thread = threading.Thread(target=self.recv, daemon=True)
         self.receive_thread_flag = True
 
@@ -264,25 +266,34 @@ class TelloClient(object):
 
     def close(self):
         self.receive_thread_flag = False
+        self._scan_complete.set()
         self._conn.client_recieve_thread_flag = True
         if self._conn:
             self._conn.close()
         self.receive_thread.join(10)
 
     def recv(self):
-        while not self._conn.client_recieve_thread_flag:
-            pass
+        self._scan_complete.wait()
         logger.info("recv thread start!")
         while self.receive_thread_flag:
-            proto = self._conn.recv()
-            self.queue.put(proto)
+            try:
+                proto = self._conn.recv()
+            except Exception:
+                if not self.receive_thread_flag:
+                    break
+                logger.warning("TelloClient: recv failed while receive thread is running")
+                break
+            with self.queue_lock:
+                self.queue.put(proto)
         logger.info("recv thread quit!")
 
     def send(self, proto):
         self._conn.send(proto)
 
     def scan_multi_robot(self, num):
-        return self._conn.scan_multi_robot(num)
+        robot_hosts = self._conn.scan_multi_robot(num)
+        self._scan_complete.set()
+        return robot_hosts
 
 
 class TelloStatus(object):
@@ -301,7 +312,7 @@ class TelloStatus(object):
         host = proto.host
         if data is None:
             if host is None:
-                logger.waring("socket closed")
+                logger.warning("socket closed")
         else:
             _last_two_words = data.strip()[-2:]
             if _last_two_words != "ok":

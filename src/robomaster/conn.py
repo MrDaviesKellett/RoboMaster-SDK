@@ -38,6 +38,14 @@ CONNECTION_PROTO_UDP = 'udp'
 __all__ = ['Connection']
 
 
+def _clear_queue(q):
+    while True:
+        try:
+            q.get_nowait()
+        except queue.Empty:
+            break
+
+
 def get_local_ip():
     """
     获取本地ip地址
@@ -137,7 +145,7 @@ def scan_robot_ip_list(timeout=3.0):
         if ip[0] not in ip_list:
             ip_list.append(ip[0])
             logger.info("conn: scan_robot_ip_list, ip_list:{0}".format(ip_list))
-            print("find robot sn:{0}, ip:{1}".format(str(data[:-1].decode(encoding='utf-8')), ip[0]))
+            logger.info("find robot sn:{0}, ip:{1}".format(str(data[:-1].decode(encoding='utf-8')), ip[0]))
     return ip_list
 
 
@@ -384,7 +392,7 @@ class StreamConnection(object):
         if self._sock_recv:
             self._sock_recv.join()
         self._sock.close()
-        self._sock_queue.queue.clear()
+        _clear_queue(self._sock_queue)
         self._recv_count = 0
         logger.info("StreamConnection: disconnected")
 

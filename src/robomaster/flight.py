@@ -47,6 +47,7 @@ LEFT = 'left'
 RIGHT = 'right'
 CLOCKWISE = 'cw'
 COUNTERCLOCKWISE = 'ccw'
+VALID_FLY_DIRECTIONS = {FORWARD, BACKWARD, UP, DOWN, LEFT, RIGHT}
 
 
 class FlightAction(action.TextAction):
@@ -59,7 +60,7 @@ class FlightAction(action.TextAction):
         self.text_cmd = text_cmd
         if self.text_cmd[0:2] == 'Re':
             self._target = self.text_cmd[0:6]
-        print('target:{}, text_cmd:{}'.format(self._target, text_cmd))
+        logger.debug('FlightAction: target=%s text_cmd=%s', self._target, text_cmd)
 
     def encode(self):
         proto = self._action_proto_cls()
@@ -297,7 +298,10 @@ class Flight:
         :param: retry: bool:是否重发命令
         :return: action对象
         """
-        # TODO check cmd.
+        if direction not in VALID_FLY_DIRECTIONS:
+            raise ValueError("Flight: unsupported direction {!r}".format(direction))
+        if not 20 <= int(distance) <= 500:
+            raise ValueError("Flight: distance must be between 20 and 500 cm")
         if retry is False:
             cmd = "{0} {1}".format(direction, distance)
             flight_action = FlightAction(cmd)
@@ -317,6 +321,8 @@ class Flight:
         :param: retry: bool:是否重发命令
         :return: action对象
         """
+        if abs(int(angle)) > 360:
+            raise ValueError("Flight: angle must be between -360 and 360 degrees")
         if angle >= 0:
             direction = "cw"
         else:
@@ -577,6 +583,8 @@ class Flight:
         :param speed: float:[10, 100]，飞行速度，单位 cm/s
         :return: bool: 设置结果
         """
+        if not 10 <= int(speed) <= 100:
+            raise ValueError("Flight: speed must be between 10 and 100 cm/s")
         cmd = "speed {0}".format(speed)
         proto = protocol.TextProtoDrone()
         proto.text_cmd = cmd

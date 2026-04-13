@@ -84,7 +84,7 @@ class MultiRobotBase(object):
         :param num:
         :return:
         """
-        pass
+        raise NotImplementedError("MultiRobotBase._scan_multi_robot must be implemented by subclasses.")
 
     def reset_all_robot(self):
         for robot_obj in self._robots_list:
@@ -115,7 +115,7 @@ class MultiRobotBase(object):
         :param robot_list:
         :return:
         """
-        pass
+        raise NotImplementedError("MultiRobotBase.build_group must be implemented by subclasses.")
 
     def remove_group(self, group_list):
         """ remove group from MultiRobot obj
@@ -234,9 +234,9 @@ class MultiEP(MultiRobotBase):
             result = robot_obj.set_robot_mode(mode)
             all_result = result and all_result
             if not result:
-                print("Id %s : Set robot mode failed" % robot_id)
+                logger.warning("Id %s : Set robot mode failed", robot_id)
             else:
-                print("Mode setup for all robots was successful")
+                logger.info("Mode setup for all robots was successful")
         return all_result
 
     def number_id(self):
@@ -296,12 +296,15 @@ class MultiDrone(MultiRobotBase):
     def run(self, *exec_list):
         _groups_exec_dict = {}
         robot_group_host_list = []
+        start_barrier = threading.Barrier(len(exec_list)) if len(exec_list) > 1 else None
         for robot_group, group_task in exec_list:
             if robot_group not in self._group_list:
                 raise Exception('Input group', robot_group, 'is not built')
             self.tello_action = multi_module.TelloAction(self._client, self._robot_id_dict, self._robot_sn_dict,
                                                          self._robot_host_dict)
-            exec_thread = threading.Thread(target=group_task, args=(self.tello_action.action_group(robot_group),))
+            action_group = self.tello_action.action_group(robot_group)
+            exec_thread = threading.Thread(target=self._run_group_task,
+                                           args=(group_task, action_group, start_barrier))
             _groups_exec_dict[robot_group] = exec_thread
             robot_group_host_list.append(robot_group.robot_group_host_list)
 
@@ -312,12 +315,20 @@ class MultiDrone(MultiRobotBase):
             raise Exception("different running groups has same id")
 
         for robot_group, exec_thread in _groups_exec_dict.items():
-            # todo 多task同步待添加
             exec_thread.start()
 
         for robot_group, exec_thread in _groups_exec_dict.items():
             exec_thread.join()
         logger.info("MultiRobotBase: run, Action is completed")
+
+    @staticmethod
+    def _run_group_task(group_task, action_group, start_barrier=None):
+        if start_barrier is not None:
+            try:
+                start_barrier.wait(timeout=2)
+            except threading.BrokenBarrierError:
+                logger.warning("MultiDrone: run group start barrier was broken")
+        group_task(action_group)
 
     def build_group(self, robot_id_group_list):
         check_result, robot_id = tool.check_robots_id(robot_id_group_list, self._robot_id_dict)
@@ -364,7 +375,7 @@ class MultiDrone(MultiRobotBase):
                 # one single id correspond to one single sn
                 raise Exception("id: {} has already exited".format(id_))
             self._robot_id_dict[id_] = sn  # find sn by id
-            self._robot_host_dict[host] = [id_]  # find id by host
+            self._robot_host_dict[host] = id_  # find id by host
 
     def number_id_to_all_drone(self, timeout=10):
         # number all drone num that initialize by self.initialize() from 0 to oo
@@ -372,4 +383,4 @@ class MultiDrone(MultiRobotBase):
         for id_, item in enumerate(self._robot_sn_dict.items()):
             sn, host = item
             self._robot_id_dict[id_] = sn  # find sn by id
-            self._robot_host_dict[host] = [id_]  # find id by host
+            self._robot_host_dict[host] = id_  # find id by host

@@ -58,10 +58,10 @@ class Camera(object):
         self._liveview = media.LiveView(robot)
 
     def start_video_stream(self, display=True):
-        pass
+        raise NotImplementedError("Camera.start_video_stream must be implemented by subclasses.")
 
     def stop_video_stream(self):
-        pass
+        raise NotImplementedError("Camera.stop_video_stream must be implemented by subclasses.")
 
     def read_video_frame(self, timeout=3, strategy="pipeline"):
         """ 读取一帧视频流帧
@@ -150,7 +150,7 @@ class TelloCamera(Camera):
 
     def stop(self):
         if self._video_enable:
-            self._stop_video_stream()
+            self.stop_video_stream()
         if self._liveview:
             self._liveview.stop()
 
@@ -236,7 +236,7 @@ class TelloCamera(Camera):
         :return: 设置结果
         """
         cmd = "downvision {0}".format(setting)
-        print("cmd", cmd)
+        logger.info("TelloCamera: set_down_vision command %s", cmd)
         proto = protocol.TextProtoDrone()
         proto.text_cmd = cmd
         msg = protocol.TextMsg(proto)

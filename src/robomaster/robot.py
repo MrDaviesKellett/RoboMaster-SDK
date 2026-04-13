@@ -457,7 +457,7 @@ class Drone(RobotBase):
             if len(self._robot_host_list) >= 1:
                 break
             if timeout < time.time() - last_time:
-                raise logger.error("Drone: can not find the drone robot")
+                raise RuntimeError("Drone: can not find the drone robot")
         return self._robot_host_list
 
     def scan_drone_robot(self):

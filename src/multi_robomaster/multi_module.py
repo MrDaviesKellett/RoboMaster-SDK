@@ -17,6 +17,7 @@
 import copy
 import time
 import threading
+import queue
 from robomaster import action
 from robomaster import flight
 from robomaster import led
@@ -111,41 +112,40 @@ class TelloDispatcher(object):
             if time.time()-cur_time > timeout:
                 logger.warning("action: {} ,timeout".format(self.cur_action))
                 break
-            qsize = _queue.qsize()
-            for i in range(qsize):
-                # todo 多group并行有可能会因为队列为空而出错，需要加锁
-                if _queue.empty():
-                    break
-                proto = _queue.get()
-                time.sleep(0.01)
-                # todo 需要补全 ERROR LIST
-                if proto.text in tello_status.FLIGHT_ACTION_SET:
-                    #  FLIGHT respond
+            matched_response = False
+            with self._client.queue_lock:
+                pending = []
+                while True:
+                    try:
+                        proto = _queue.get_nowait()
+                    except queue.Empty:
+                        break
                     if proto.host in _action_host_list:
                         tello_status.judge(proto)
                         _action_host_list.remove(proto.host)
+                        matched_response = True
+                        if proto.text not in tello_status.FLIGHT_ACTION_SET \
+                                and proto.text not in tello_status.EXT_ACTION_SET:
+                            id_ = self._robot_host_dict[proto.host]
+                            logger.info("DRONE id: {}, reply: {}".format(id_, proto.text))
                     else:
-                        _queue.put(proto)
-                elif proto.text in tello_status.EXT_ACTION_SET:
-                    # EXT respond
-                    if proto.host in _action_host_list:
-                        tello_status.judge(proto)
-                        _action_host_list.remove(proto.host)
-                    else:
-                        _queue.put(proto)
-                else:
-                    # DRONE respond
-                    if proto.host in _action_host_list:
-                        tello_status.judge(proto)
-                        _action_host_list.remove(proto.host)
-                        id_ = self._robot_host_dict[proto.host]
-                        logger.info("DRONE id: {}, reply: {}".format(id_, proto.text))
-                        print("DRONE id: {}, reply: {}".format(id_, proto.text))   # output to console
-                    else:
-                        _queue.put(proto)
+                        pending.append(proto)
+                for proto in pending:
+                    _queue.put(proto)
+            if not matched_response:
+                time.sleep(0.05)
         if self.special == "takeoff":
-            while not _queue.empty():
-                _ = _queue.get()    # drone bug: takeoff reply double ok
+            with self._client.queue_lock:
+                pending = []
+                while True:
+                    try:
+                        proto = _queue.get_nowait()
+                    except queue.Empty:
+                        break
+                    if proto.host not in self._action_host_list:
+                        pending.append(proto)
+                for proto in pending:
+                    _queue.put(proto)
         logger.info("wait_for_completed: finished")
         self.event.set()
         return self
@@ -345,7 +345,7 @@ class TelloAction(object):
 
     def send_command(self, command):
         self.event.wait(10)
-        if self.event.isSet():
+        if self.event.is_set():
             for host in self.robot_group_host_list:
                 logger.info("execute command：{}".format(command))
                 proto = tool.TelloProtocol(command, host)
@@ -357,7 +357,7 @@ class TelloAction(object):
 
     def send_custom_command(self, command_host_list, action="go"):
         self.event.wait(10)
-        if self.event.isSet():
+        if self.event.is_set():
             for command_host in command_host_list:
                 command, host = command_host
                 logger.info("execute command：{}".format(command))
