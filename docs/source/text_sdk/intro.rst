@@ -37,7 +37,7 @@ RoboMaster EP 最重要的一个功能是支持明文 SDK，包含各个内置�
 	:linenos:
 
 	# -*- encoding: utf-8 -*-
-	# 测试环境: Python 3.6 版本
+	# 测试环境: Python 3.14+ 版本
 
 	import socket
 	import sys

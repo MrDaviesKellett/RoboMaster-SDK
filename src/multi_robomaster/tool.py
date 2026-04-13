@@ -16,15 +16,13 @@
 
 import time
 import traceback
-import netifaces
-import netaddr
-from netaddr import IPNetwork
 import socket
 import queue
 import threading
 from . import logger
 from robomaster import conn
 from robomaster import config
+from robomaster import network
 
 
 def get_func_name():
@@ -91,36 +89,7 @@ def get_subnets():
     :return: list[str]: subnets
              list[str]: addr_list
     """
-    subnets = []
-    ifaces = netifaces.interfaces()
-    addr_list = []
-    for myiface in ifaces:
-        addrs = netifaces.ifaddresses(myiface)
-
-        if socket.AF_INET not in addrs:
-            continue
-        # Get ipv4 stuff
-        ipinfo = addrs[socket.AF_INET][0]
-        address = ipinfo['addr']
-        netmask = ipinfo['netmask']
-        broadcast = ipinfo['broadcast']
-
-        # special subnet
-        if config.LOCAL_IP_STR is not None:
-            target_broadcast = config.LOCAL_IP_STR.rsplit('.', 1)[0] + '.255'
-            if target_broadcast != broadcast:
-                continue
-
-        # limit range of search. This will work for router subnets
-        if netmask != '255.255.255.0':
-            continue
-
-        # Create ip object and get
-        cidr = netaddr.IPNetwork('%s/%s' % (address, netmask))
-        network = cidr.network
-        subnets.append((network, netmask))
-        addr_list.append(address)
-    return subnets, addr_list
+    return network.get_local_ipv4_subnets(local_ip=config.LOCAL_IP_STR)
 
 
 class TelloProtocol(object):
@@ -233,11 +202,7 @@ class TelloConnection(object):
         possible_addr = []
 
         for subnet, netmask in subnets:
-            for ip in IPNetwork('%s/%s' % (subnet, netmask)):
-                # skip local and broadcast
-                if str(ip).split('.')[3] == '0' or str(ip).split('.')[3] == '255':
-                    continue
-                possible_addr.append(str(ip))
+            possible_addr.extend(network.get_ipv4_hosts(subnet, netmask))
 
         while len(self._robot_host_list) < num:
             logger.info('[Still_Searching]Trying to find Tello in subnets...\n')

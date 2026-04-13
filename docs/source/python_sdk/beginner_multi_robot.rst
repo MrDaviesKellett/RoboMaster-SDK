@@ -24,13 +24,9 @@ __________________
 多机初始化
 __________________
 
-环境准备安装netifaces包::
+环境准备安装 RoboMaster SDK::
 
-	pip install netifaces
-
-.. tip:: 如果出现以下问题，请下载安装visualcppbuildtools_full.exe(`下载地址：GitHub RoboMaster SDK repository <https://github.com/dji-sdk/robomaster-sdk>`_)
-
-	.. image:: ./../images/neti_err.jpg
+	python -m pip install .
 
 
 1. 首先将机器人设置为路由器组网模式，并将所有机器人与运行 RobomasterSDK 的设备连接至同一个局域网内。

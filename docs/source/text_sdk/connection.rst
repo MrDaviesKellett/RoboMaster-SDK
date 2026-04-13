@@ -99,7 +99,7 @@ WIFI 直连模式
 		:linenos:
 
 		# -*- encoding: utf-8 -*-
-		# 测试环境: Python 3.6 版本
+		# 测试环境: Python 3.14+ 版本
 
 		import socket
 		import sys
@@ -252,7 +252,7 @@ WIFI 路由器模式
 		:linenos:
 
 		# -*- encoding: utf-8 -*-
-		# 测试环境：Python 3.6 版本
+		# 测试环境：Python 3.14+ 版本
 
 		import socket
 		import sys
@@ -384,7 +384,7 @@ USB 连接模式，实质上是使用 RNDIS 协议，将机器人上的 USB 设�
 		:linenos:
 
 		# -*- encoding: utf-8 -*-
-		# 测试环境: Python 3.6 版本
+		# 测试环境: Python 3.14+ 版本
 
 		import socket
 		import sys
@@ -436,7 +436,7 @@ UART 连接
 		:linenos:
 
 		# -*- encoding: utf-8 -*-
-		# 测试环境：Python 3.6 版本
+		# 测试环境：Python 3.14+ 版本
 		import serial
 
 		ser = serial.Serial()

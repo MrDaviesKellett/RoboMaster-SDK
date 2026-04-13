@@ -12,8 +12,8 @@ there are code examples, you can refer to our developer documentation robomaster
 from setuptools import setup, find_packages
 import os.path
 import sys
-if sys.version_info < (3, 6, 5):
-    sys.exit("RoboMaster SDK requires Python 3.6.5 or later")
+if sys.version_info < (3, 14):
+    sys.exit("RoboMaster SDK requires Python 3.14 or later")
 
 curr = os.path.abspath(os.path.dirname(__file__))
 
@@ -40,16 +40,23 @@ setup(
     zip_safe=True,
     keywords='dji robomaster sdk robot drone'.split(),
     url="http://www.robomaster.com",
+    python_requires=">=3.14",
     package_dir={'': 'src'},
     packages=find_packages('src'),
     package_data={
       'robomaster': ['LICENSE.txt', 'README.md']
     },
     install_requires=[
-        'numpy >= 1.18',
-        'opencv-python >= 4.2',
-        'netaddr >= 0.8',
-        'netifaces >= 0.10',
-        'myqr >= 2.3'
-    ]
+        'numpy >= 2.3.4',
+        'opencv-python >= 4.13.0.92',
+        'psutil >= 7.2.2',
+    ],
+    extras_require={
+        'qrcode': ['MyQR >= 2.3.1'],
+    },
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.14',
+    ],
 )

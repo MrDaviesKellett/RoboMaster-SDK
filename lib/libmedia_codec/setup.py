@@ -21,9 +21,18 @@ import platform
 import subprocess
 import shutil
 
+try:
+    import pybind11
+except ImportError:
+    pybind11 = None
+
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
+
+if sys.version_info < (3, 14):
+    sys.exit("libmedia_codec requires Python 3.14 or later")
+if pybind11 is None:
+    sys.exit("libmedia_codec requires pybind11 >= 3.0.3. Install it with 'python -m pip install pybind11>=3.0.3'.")
 
 
 class CMakeExtension(Extension):
@@ -41,9 +50,9 @@ class CMakeBuild(build_ext):
                                ", ".join(e.name for e in self.extensions))
 
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+            cmake_version = tuple(int(part) for part in re.search(r'version\s*([\d.]+)', out.decode()).group(1).split('.'))
+            if cmake_version < (3, 15, 0):
+                raise RuntimeError("CMake >= 3.15.0 is required on Windows")
 
         for ext in self.extensions:
             self.build_extension(ext)
@@ -55,7 +64,8 @@ class CMakeBuild(build_ext):
             extdir += os.path.sep
 
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+                      '-DPYTHON_EXECUTABLE=' + sys.executable,
+                      '-Dpybind11_DIR=' + pybind11.get_cmake_dir()]
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -94,6 +104,7 @@ setup(
     author='DJI RoboMaster',
     description='RoboMaster python SDK libmedia_codec project',
     long_description='',
+    python_requires='>=3.14',
     ext_modules=[CMakeExtension('libmedia_codec')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,

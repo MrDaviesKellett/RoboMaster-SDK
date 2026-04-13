@@ -3,16 +3,21 @@ cd $basepath
 cd ..
 rm -rf build dist output robomaster_media_decoder.egg-info
 
-/opt/python/cp36-cp36m/bin/python setup.py build
-/opt/python/cp36-cp36m/bin/python setup.py bdist_wheel
-/opt/python/cp36-cp36m/bin/auditwheel repair ./dist/`ls ./dist |grep cp36-cp36m`
+PYTHON_TAGS=${PYTHON_TAGS:-"cp314-cp314 cp314-cp314t"}
 
-rm -rf build dist output robomaster_media_decoder.egg-info
-/opt/python/cp37-cp37m/bin/python setup.py build
-/opt/python/cp37-cp37m/bin/python setup.py bdist_wheel
-/opt/python/cp37-cp37m/bin/auditwheel repair ./dist/`ls ./dist |grep cp37-cp37m`
+for tag in $PYTHON_TAGS; do
+    rm -rf build dist output robomaster_media_decoder.egg-info
+    interpreter="/opt/python/${tag}/bin/python"
+    auditwheel_bin="/opt/python/${tag}/bin/auditwheel"
+    if [ ! -x "$interpreter" ]; then
+        echo "skip missing interpreter: $interpreter"
+        continue
+    fi
 
-rm -rf build dist output robomaster_media_decoder.egg-info
-/opt/python/cp38-cp38/bin/python setup.py build
-/opt/python/cp38-cp38/bin/python setup.py bdist_wheel
-/opt/python/cp38-cp38/bin/auditwheel repair ./dist/`ls ./dist |grep cp38-cp38`
+    "$interpreter" setup.py build
+    "$interpreter" setup.py bdist_wheel
+    wheel_name=$(ls ./dist | grep "$tag" | head -n 1)
+    if [ -n "$wheel_name" ] && [ -x "$auditwheel_bin" ]; then
+        "$auditwheel_bin" repair "./dist/$wheel_name"
+    fi
+done

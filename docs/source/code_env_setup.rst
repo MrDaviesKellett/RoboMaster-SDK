@@ -15,23 +15,23 @@
 
 **环境：** Windows 10 64 位
 
-1. 从python官网  `python 官网链接 <https://www.python.org/downloads/windows/>`_ 找到可以下载的安装包，以Python3.7.8 为例，选择安装文件进行下载。
+1. 从python官网  `python 官网链接 <https://www.python.org/downloads/windows/>`_ 下载 **64 位 CPython 3.14 或更高版本** 安装包。
 
-.. warning:: 请确保下载的 `python.exe` 是64位的，python sdk适配3.6.6以上至3.8.9版本python版本，否则会影响python sdk的使用，切记。
+.. warning:: 本 fork 的 RoboMaster SDK 以 **CPython 3.14+** 为目标版本，请务必安装 64 位 Python。
 
 .. image:: ./images/win_python_setup1.png
 
 
-2. 步骤（1）：确认安装包版本是 ``64-bit``, 否则会影响Python sdk使用。
+2. 步骤（1）：确认安装包版本是 ``64-bit``。
 
-   步骤（2）：勾选 ``Add Python 3.7 to Path``。
+   步骤（2）：勾选 ``Add Python to PATH``。
 
    步骤（3）：选择 ``Install Now`` 进行安装，如下图所示。
 
 .. image:: ./images/win_python_setup2.png
 
 
-3. 安装完成后按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令提示符界面，在命令行里面输入 ``python``, 确认 Python 3.7.8 安装成功。
+3. 安装完成后按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令提示符界面，在命令行里面输入 ``python --version``, 确认 Python 3.14+ 安装成功。
 
 .. image:: ./images/python_version.png
 
@@ -41,27 +41,23 @@
 在 Ubuntu 上安装 Python
 -------------------------
 
-**环境：** ubuntu 16.04 64 位，Python 3.7.8
+**环境：** 64 位 Linux，Python 3.14 或更高版本
 
-1. Ubuntu16.04 默认安装了Python2.7和3.5，输入命令 ``python``，可以查看 Python 默认版本。请注意，系统自带的python千万不能卸载。
+1. 请使用发行版软件源、pyenv，或官方构建安装 **Python 3.14+**。请不要卸载系统自带 Python。
 
-2. 输入如下命令安装 python 3.7 软件包：
-
-::
-
-	sudo add-apt-repository ppa:jonathonf/python-3.7
-	sudo apt-get update
-	sudo apt-get install python3.7
-
-3. 输入如下命令，调整 Python3 的优先级，使得 Python 3.7 优先级较高。
+2. 推荐使用虚拟环境隔离 SDK 依赖：
 
 ::
 
-		sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-		sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
-		sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 100
-		sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 150
+	python3.14 -m venv .venv
+	source .venv/bin/activate
+	python -m pip install --upgrade pip
 
-4. 此时再输入命令 ``python`` ，确认 Python 3.7 安装成功。
+3. 输入如下命令确认解释器版本：
 
+::
+
+	python --version
+
+4. 确认命令输出为 Python 3.14 或更高版本后，再安装 RoboMaster SDK。
 

@@ -53,23 +53,23 @@ Demo的环境要求及物料清单
 
 （4）python环境安装：
 
-a. 从 `python 官网上 <https://www.python.org/downloads/windows/>`_ 找到可以下载的安装包，以Python3.7.8 为例，选择安装文件进行下载。
+a. 从 `python 官网上 <https://www.python.org/downloads/windows/>`_ 下载 64 位 **CPython 3.14 或更高版本**。
 
-.. warning:: 请确保下载的 `python.exe` 是64位的，python sdk适配3.6.6以上python版本，否则会影响python sdk的使用，如果电脑上已经安装了python环境，建议卸载重新安装。
+.. warning:: 请确保下载的 `python.exe` 是 64 位版本。本 fork 的 RoboMaster SDK 以 **CPython 3.14+** 为目标版本。
 
 .. image:: ./../images/win_python_setup1.png
 
 
-b. 步骤（1）：确认安装包版本是 ``64-bit``, 否则会影响Python sdk使用。
+b. 步骤（1）：确认安装包版本是 ``64-bit``。
 
-   步骤（2）：勾选 ``Add Python 3.7 to Path``。
+   步骤（2）：勾选 ``Add Python to Path``。
 
    步骤（3）：选择 ``Install Now`` 进行安装，如下图所示。
 
 .. image:: ./../images/win_python_setup2.png
 
 
-c. 安装完成后按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令提示符界面，在命令行里面输入 ``python``, 确认 Python 3.7.8 安装成功。
+c. 安装完成后按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令提示符界面，在命令行里面输入 ``python --version``, 确认 Python 3.14+ 安装成功。
 
 .. image:: ./../images/python_version.png
 
@@ -80,10 +80,8 @@ c. 安装完成后按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令�
 
     方法二：安装RoboMaster SDK，点击电脑开始菜单，在搜索框中输入 ``cmd`` ，在搜索结果中，对着命令提示符程序，单击鼠标右键，菜单中点击选择 ``以管理员身份运行`` ,并依次输入以下指令::
 
-		pip install robomaster
-		pip install netaddr
-		pip install netifaces
-		pip install myqr
+		python -m pip install .
+		python -m pip install MyQR
 
 2. **EP小车**
 

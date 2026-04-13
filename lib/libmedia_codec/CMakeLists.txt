@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.15)
 project (robomaster_media_codec)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/output)
 
-set(PYBIND11_PYTHON_VERSION 3)
-add_subdirectory(pybind11)
+find_package(pybind11 CONFIG REQUIRED)
 
 pybind11_add_module(libmedia_codec src/media_codec.cpp)
 

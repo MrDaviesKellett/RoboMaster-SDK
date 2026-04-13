@@ -40,13 +40,21 @@ RoboMaster SDK 安装
 安装robomaster python sdk
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-安装RoboMaster SDK，点开开始菜单，在搜索框中输入 ``cmd`` ，在搜索结果中，对着命令提示符程序，单击鼠标右键，菜单中点击选择 ``以管理员身份运行`` ,并输入以下指令::
+安装本仓库中的 RoboMaster SDK，点开开始菜单，在搜索框中输入 ``cmd`` ，在搜索结果中，对着命令提示符程序，单击鼠标右键，菜单中点击选择 ``以管理员身份运行`` ，进入仓库根目录后输入以下指令::
 
-    pip install robomaster
+    python -m pip install .
    
 如果网络较差，多次都安装失败，可以尝试::
 
-    pip install -i https://pypi.tuna.tsinghua.edu.cn/simple robomaster
+    python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple .
+
+如需运行二维码联网辅助示例，可额外安装::
+
+    python -m pip install MyQR
+
+如需从源码构建音视频流依赖 ``libmedia_codec`` ，请在仓库根目录执行::
+
+    python setup_with_lib.py build_ext --inplace
 
 .. tip:: 如果出现下列情况，请参考以下链接进行python环境安装：:doc:`python编程环境安装 <./../code_env_setup>`
 
@@ -57,7 +65,7 @@ RoboMaster SDK 安装
 
 当需要升级 RoboMaster SDK时，可在命令行中输入以下指令::
 
-    pip install --upgrade robomaster
+    python -m pip install --upgrade .
 
 
 
@@ -65,14 +73,14 @@ RoboMaster SDK 安装
 ----------------------
 
 
-Ubuntu 16.04
+Linux
 
 
 
 Python 环境安装
 
 
-介绍 Ubuntu 16.04 的Python环境安装。
+请先准备 Python 3.14+ 环境。
 
 
 安装 RoboMaster SDK
@@ -80,7 +88,7 @@ Python 环境安装
 
 安装 RoboMaster SDK，可输入以下指令::
 
-    pip install robomaster
+    python -m pip install .
 
 
 
@@ -89,7 +97,7 @@ Python 环境安装
 
 当需要升级 RoboMaster SDK时，可在命令行中输入以下指令::
 
-    pip install --upgrade robomaster
+    python -m pip install --upgrade .
 
 .. tip:: 树莓派下的python sdk安装教程可参考 `sdk install on Raspberry Pi.7z <https://github.com/dji-sdk/robomaster-sdk>`_
 
@@ -102,7 +110,7 @@ Python 环境安装
 
 安装RoboMaster SDK，可输入以下指令::
 
-    pip install robomaster
+    python -m pip install .
 
 
 升级 RoboMaster SDK
@@ -110,5 +118,4 @@ Python 环境安装
 
 当需要升级 RoboMaster SDK时，可在命令行中输入以下指令::
 
-    pip install --upgrade robomaster
-
+    python -m pip install --upgrade .

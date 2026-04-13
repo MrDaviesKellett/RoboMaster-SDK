@@ -89,9 +89,9 @@ USB 连接模式，实质上是使用 RNDIS 协议，将机器人上的 USB 设�
 
 	.. centered:: DJI 妙算、Jetson Nano 或 PC 路由连接至 EP
 
-- 安装myqr库生成二维码，按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令提示符界面，在命令行里面输入::
+- 安装 MyQR 库生成二维码，按 ``win+r``，在弹出窗口中输入 ``cmd`` 打开命令提示符界面，在命令行里面输入::
 
-   pip install myqr
+   python -m pip install MyQR
 
 - 参考sdk代码 :file:`/examples/01_robot/05_sta_conn_helper.py` 目录下的例程（`GitHub RoboMaster SDK repository <https://github.com/dji-sdk/robomaster-sdk>`_）
 
@@ -243,4 +243,3 @@ Robomaster SDK 与EP的3种连接方式在通讯协议上支持 TCP 和 UDP 通�
 ___________________________
 
 目前 Tello EDU 与 Tello Talent 只支持UDP通信方式，因此不需要额外的配置
-

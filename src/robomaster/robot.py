@@ -16,11 +16,8 @@
 
 import os
 import threading
-import netifaces
 import socket
-import netaddr
 import time
-from netaddr import IPNetwork
 from . import protocol
 from . import logger
 from . import action
@@ -43,6 +40,7 @@ from . import armor
 from . import flight
 from . import uart
 from . import ai_module
+from . import network
 
 __all__ = ['Robot', 'RobotPlaySoundAction', 'Drone', 'FREE', 'GIMBAL_LEAD', 'CHASSIS_LEAD',
            'SOUND_ID_ATTACK', 'SOUND_ID_SHOOT', 'SOUND_ID_SCANNING', 'SOUND_ID_RECOGNIZED',
@@ -430,29 +428,7 @@ class Drone(RobotBase):
         :return: list[str]: subnets
                  list[str]: addr_list
         """
-        subnets = []
-        ifaces = netifaces.interfaces()
-        addr_list = []
-        for myiface in ifaces:
-            addrs = netifaces.ifaddresses(myiface)
-
-            if socket.AF_INET not in addrs:
-                continue
-            # Get ipv4 stuff
-            ipinfo = addrs[socket.AF_INET][0]
-            address = ipinfo['addr']
-            netmask = ipinfo['netmask']
-
-            # limit range of search. This will work for router subnets
-            if netmask != '255.255.255.0':
-                continue
-
-            # Create ip object and get
-            cidr = netaddr.IPNetwork('%s/%s' % (address, netmask))
-            network = cidr.network
-            subnets.append((network, netmask))
-            addr_list.append(address)
-        return subnets, addr_list
+        return network.get_local_ipv4_subnets()
 
     def _scan_host(self, timeout=10):
         """Find avaliable ip list in server's subnets
@@ -466,11 +442,7 @@ class Drone(RobotBase):
         possible_addr = []
 
         for subnet, netmask in subnets:
-            for ip in IPNetwork('%s/%s' % (subnet, netmask)):
-                # skip local and broadcast
-                if str(ip).split('.')[3] == '0' or str(ip).split('.')[3] == '255':
-                    continue
-                possible_addr.append(str(ip))
+            possible_addr.extend(network.get_ipv4_hosts(subnet, netmask))
         last_time = time.time()
         while len(self._robot_host_list) < 10:
             # delete already fond Tello ip

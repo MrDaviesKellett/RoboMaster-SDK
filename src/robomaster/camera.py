@@ -15,7 +15,6 @@
 
 
 import numpy
-import audioop
 import wave
 import time
 from . import module
@@ -30,6 +29,23 @@ __all__ = ['Camera', 'EPCamera', 'TelloCamera', 'STREAM_360P', 'STREAM_540P', 'S
 STREAM_360P = "360p"
 STREAM_540P = "540p"
 STREAM_720P = "720p"
+
+
+def _resample_pcm16_mono(data, source_rate, target_rate):
+    """Resample mono 16-bit PCM data without removed stdlib modules."""
+    if source_rate == target_rate or not data:
+        return data
+
+    samples = numpy.frombuffer(data, dtype=numpy.int16)
+    if len(samples) <= 1:
+        return samples.tobytes()
+
+    target_length = max(1, round(len(samples) * target_rate / source_rate))
+    source_positions = numpy.arange(len(samples), dtype=numpy.float64)
+    target_positions = numpy.linspace(0, len(samples) - 1, num=target_length, dtype=numpy.float64)
+    converted = numpy.interp(target_positions, source_positions, samples.astype(numpy.float32))
+    converted = numpy.clip(numpy.rint(converted), -32768, 32767).astype(numpy.int16)
+    return converted.tobytes()
 
 
 class Camera(object):
@@ -373,8 +389,7 @@ class EPCamera(module.Module, Camera):
 
             if sample_rate != 48000:
                 data = b''.join(frames)
-                converted = audioop.ratecv(data, 2, 1, 48000, sample_rate, None)
-                wf.writeframes(converted[0])
+                wf.writeframes(_resample_pcm16_mono(data, 48000, sample_rate))
             wf.close()
         except Exception as e:
             logger.error("Camera: record_audio, exception {0}".format(e))

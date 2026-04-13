@@ -18,10 +18,17 @@ from . import conn
 from . import logger
 import threading
 import queue
-import libmedia_codec
 import numpy
 import cv2
 import time
+
+try:
+    import libmedia_codec
+except ImportError as err:
+    libmedia_codec = None
+    _MEDIA_CODEC_IMPORT_ERROR = err
+else:
+    _MEDIA_CODEC_IMPORT_ERROR = None
 
 
 class LiveView(object):
@@ -29,7 +36,7 @@ class LiveView(object):
     def __init__(self, robot):
         self._robot = robot
         self._video_stream_conn = conn.StreamConnection()
-        self._video_decoder = libmedia_codec.H264Decoder()
+        self._video_decoder = None
         # disable logging
         self._video_decoder_thread = None
         self._video_display_thread = None
@@ -39,13 +46,31 @@ class LiveView(object):
         self._video_frame_count = 0
 
         self._audio_stream_conn = conn.StreamConnection()
-        self._audio_decoder = libmedia_codec.OpusDecoder()
+        self._audio_decoder = None
         self._audio_decoder_thread = None
         self._audio_playing_thread = None
         self._audio_frame_queue = queue.Queue(32)
         self._audio_streaming = False
         self._playing = False
         self._audio_frame_count = 0
+
+    @staticmethod
+    def _require_media_codec():
+        if libmedia_codec is None:
+            raise ImportError(
+                "libmedia_codec is required for RoboMaster audio/video streaming. "
+                "Build it with setup_with_lib.py or install lib/libmedia_codec first."
+            ) from _MEDIA_CODEC_IMPORT_ERROR
+
+    def _ensure_video_decoder(self):
+        self._require_media_codec()
+        if self._video_decoder is None:
+            self._video_decoder = libmedia_codec.H264Decoder()
+
+    def _ensure_audio_decoder(self):
+        self._require_media_codec()
+        if self._audio_decoder is None:
+            self._audio_decoder = libmedia_codec.OpusDecoder()
 
     def __del__(self):
         self.stop()
@@ -58,6 +83,7 @@ class LiveView(object):
 
     def start_video_stream(self, display=True, addr=None, ip_proto="tcp"):
         try:
+            self._ensure_video_decoder()
             logger.info("Liveview: try to connect addr {0}, proto={1}".format(
                 addr, ip_proto))
             self._video_stream_conn.connect(addr, ip_proto)
@@ -108,7 +134,7 @@ class LiveView(object):
         for frame_data in frames:
             (frame, width, height, ls) = frame_data
             if frame:
-                frame = numpy.fromstring(frame, dtype=numpy.ubyte, count=len(frame), sep='')
+                frame = numpy.frombuffer(frame, dtype=numpy.ubyte)
                 frame = (frame.reshape((height, width, 3)))
                 res_frame_list.append(frame)
         return res_frame_list
@@ -159,6 +185,7 @@ class LiveView(object):
 
     def start_audio_stream(self, addr=None, ip_proto="tcp"):
         try:
+            self._ensure_audio_decoder()
             logger.info("LiveView: try to connect addr:{0}, ip_proto:{1}".format(
                 addr, ip_proto))
             self._audio_stream_conn.connect(addr, ip_proto)
