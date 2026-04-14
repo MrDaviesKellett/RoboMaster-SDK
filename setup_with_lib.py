@@ -15,12 +15,10 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from setup_support import base_setup_kwargs
-from setup_support import ensure_pybind11
 from setup_support import ensure_supported_python
 
 
 ensure_supported_python()
-ensure_pybind11()
 
 setup(
     long_description=__doc__,

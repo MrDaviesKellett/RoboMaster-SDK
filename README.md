@@ -26,7 +26,7 @@ Install from PyPI:
 python -m pip install robomaster-sdk-modern
 ```
 
-This is now the canonical install path, including camera/audio media support when a wheel is available for your platform.
+This is now the canonical install path. Media streaming support is provided through the PyPI dependency `av`, which already ships cross-platform FFmpeg-backed wheels.
 
 Install from a local checkout:
 
@@ -42,22 +42,11 @@ python -m pip install MyQR
 
 ## Media streaming support
 
-Video and audio streaming use the `libmedia_codec` extension module.
+Video and audio streaming now use the `av` Python package by default.
 
-- The default package build now includes `libmedia_codec`.
-- `pip install robomaster-sdk-modern` will install a prebuilt media-enabled wheel when PyPI has one for your platform.
-- If pip falls back to a source build, the standard package build now compiles `libmedia_codec` automatically.
-- `setup_with_lib.py` remains as a compatibility wrapper around the same media-enabled build path.
-- `lib/libmedia_codec` now expects a modern external `pybind11` installation instead of the vendored legacy snapshot.
-
-The release pipeline now builds repaired wheels for Linux, macOS, and Windows so FFmpeg/Opus runtime libraries are bundled into the wheel instead of requiring separate end-user installation on those platforms.
-
-Build prerequisites for source installs with media support:
-
-- CMake 3.15+
-- `pybind11` 3.0.3+
-- FFmpeg and Opus development libraries on Linux/macOS
-- Visual C++ build tools on Windows
+- `av` publishes CPython 3.14 wheels for Linux, macOS, and Windows with FFmpeg bundled.
+- `libmedia_codec` remains supported as a legacy fallback backend for advanced/source users, but it is no longer required for normal package installs.
+- The default PyPI package no longer needs a custom native wheel pipeline just to enable camera/audio features.
 
 ## Compatibility changes in this fork
 
@@ -67,13 +56,12 @@ Build prerequisites for source installs with media support:
 
 ## Release workflow
 
-`pyproject.toml` is now the canonical build metadata for the forked distribution, including the native media extension.
+`pyproject.toml` is now the canonical build metadata for the forked distribution.
 
 Build and upload with:
 
 ```bash
 python -m pip install .[release]
-python -m build --sdist
-python -m cibuildwheel --output-dir dist
+python -m build
 python -m twine upload dist/*
 ```

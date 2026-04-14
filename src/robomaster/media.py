@@ -23,6 +23,14 @@ import cv2
 import time
 
 try:
+    import av as pyav
+except ImportError as err:
+    pyav = None
+    _PYAV_IMPORT_ERROR = err
+else:
+    _PYAV_IMPORT_ERROR = None
+
+try:
     import libmedia_codec
 except ImportError as err:
     libmedia_codec = None
@@ -37,6 +45,41 @@ def _clear_queue(q):
             q.get_nowait()
         except queue.Empty:
             break
+
+
+class _PyAVH264Decoder:
+
+    def __init__(self):
+        self._codec = pyav.CodecContext.create("h264", "r")
+
+    def decode(self, data):
+        frames = []
+        for packet in self._codec.parse(data):
+            for frame in self._codec.decode(packet):
+                image = frame.to_ndarray(format="bgr24")
+                height, width = image.shape[:2]
+                frames.append((image.tobytes(), width, height, image.strides[0]))
+        return frames
+
+
+class _PyAVOpusDecoder:
+
+    def __init__(self, sample_rate=48000, channels=1):
+        self._codec = pyav.CodecContext.create("opus", "r")
+        self._sample_rate = sample_rate
+        self._channels = channels
+
+    def decode(self, data):
+        output = []
+        for packet in self._codec.parse(data):
+            for frame in self._codec.decode(packet):
+                samples = frame.to_ndarray()
+                if samples.ndim > 1:
+                    samples = samples.reshape(-1)
+                if samples.dtype != numpy.int16:
+                    samples = samples.astype(numpy.int16, copy=False)
+                output.append(samples.tobytes())
+        return b"".join(output)
 
 
 class LiveView(object):
@@ -64,22 +107,28 @@ class LiveView(object):
 
     @staticmethod
     def _require_media_codec():
-        if libmedia_codec is None:
+        if pyav is None and libmedia_codec is None:
             raise ImportError(
-                "libmedia_codec is required for RoboMaster audio/video streaming. "
-                "Install a robomaster-sdk-modern wheel that includes media support, "
-                "or build the package from source with pip so libmedia_codec is compiled locally."
-            ) from _MEDIA_CODEC_IMPORT_ERROR
+                "A media decoder backend is required for RoboMaster audio/video streaming. "
+                "Install the PyPI dependency 'av', or install/build the optional legacy "
+                "'libmedia_codec' extension."
+            ) from (_PYAV_IMPORT_ERROR or _MEDIA_CODEC_IMPORT_ERROR)
 
     def _ensure_video_decoder(self):
         self._require_media_codec()
         if self._video_decoder is None:
-            self._video_decoder = libmedia_codec.H264Decoder()
+            if pyav is not None:
+                self._video_decoder = _PyAVH264Decoder()
+            else:
+                self._video_decoder = libmedia_codec.H264Decoder()
 
     def _ensure_audio_decoder(self):
         self._require_media_codec()
         if self._audio_decoder is None:
-            self._audio_decoder = libmedia_codec.OpusDecoder()
+            if pyav is not None:
+                self._audio_decoder = _PyAVOpusDecoder()
+            else:
+                self._audio_decoder = libmedia_codec.OpusDecoder()
 
     def __del__(self):
         self.stop()

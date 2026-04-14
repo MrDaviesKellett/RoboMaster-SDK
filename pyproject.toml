@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=82", "wheel>=0.45", "cmake>=3.15", "pybind11>=3.0.3"]
+requires = ["setuptools>=82", "wheel>=0.45"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,6 +23,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Human Machine Interfaces",
 ]
 dependencies = [
+  "av>=16.1.0",
   "numpy>=2.3.4",
   "opencv-python>=4.13.0.92",
   "psutil>=7.2.2",
@@ -33,9 +34,6 @@ dynamic = ["version"]
 qrcode = ["MyQR>=2.3.1"]
 release = [
   "build>=1.2.2.post1",
-  "cibuildwheel>=3.3.0",
-  "delocate>=0.13.0",
-  "delvewheel>=1.11.2",
   "twine>=6.1.0",
 ]
 
@@ -58,26 +56,6 @@ version = {attr = "robomaster.version.__version__"}
 
 [tool.robomaster_release]
 distribution = "robomaster-sdk-modern"
-build = "python -m build --sdist && python -m cibuildwheel --output-dir dist"
+build = "python -m build"
 upload = "python -m twine upload dist/*"
 test_upload = "python -m twine upload --repository testpypi dist/*"
-
-[tool.cibuildwheel]
-archs = "auto64"
-build = "cp314-*"
-skip = "*-musllinux_*"
-test-command = "python -c \"import libmedia_codec; import robomaster.media; print(libmedia_codec.__name__)\""
-
-[tool.cibuildwheel.linux]
-manylinux-x86_64-image = "manylinux_2_28"
-before-all = "dnf install -y pkgconf-pkg-config libavcodec-free-devel libavutil-free-devel libswscale-free-devel opus-devel"
-
-[tool.cibuildwheel.macos]
-before-all = "brew install pkg-config ffmpeg opus"
-before-build = "python -m pip install --upgrade delocate"
-repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
-
-[tool.cibuildwheel.windows]
-archs = "AMD64"
-before-build = "python -m pip install --upgrade delvewheel"
-repair-wheel-command = "delvewheel repair --add-path \"lib\\\\libmedia_codec\\\\src\\\\ffmpeg-dll;lib\\\\libmedia_codec\\\\src\\\\opus-dll\" -w {dest_dir} {wheel}"
