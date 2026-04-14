@@ -50,6 +50,8 @@ Video and audio streaming use the `libmedia_codec` extension module.
 - `setup_with_lib.py` remains as a compatibility wrapper around the same media-enabled build path.
 - `lib/libmedia_codec` now expects a modern external `pybind11` installation instead of the vendored legacy snapshot.
 
+The release pipeline now builds repaired wheels for Linux, macOS, and Windows so FFmpeg/Opus runtime libraries are bundled into the wheel instead of requiring separate end-user installation on those platforms.
+
 Build prerequisites for source installs with media support:
 
 - CMake 3.15+
@@ -71,6 +73,7 @@ Build and upload with:
 
 ```bash
 python -m pip install .[release]
-python -m build
+python -m build --sdist
+python -m cibuildwheel --output-dir dist
 python -m twine upload dist/*
 ```

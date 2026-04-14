@@ -44,7 +44,7 @@ RoboMaster SDK 安装
 
     python -m pip install robomaster-sdk-modern
 
-默认情况下，PyPI 提供的平台 wheel 将直接包含 ``libmedia_codec`` ，可直接使用音视频流功能。
+默认情况下，PyPI 提供的 Linux、macOS、Windows 平台 wheel 将直接包含 ``libmedia_codec`` 及其运行时依赖，可直接使用音视频流功能。
    
 如果网络较差，多次都安装失败，可以尝试::
 

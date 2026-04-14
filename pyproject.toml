@@ -33,6 +33,9 @@ dynamic = ["version"]
 qrcode = ["MyQR>=2.3.1"]
 release = [
   "build>=1.2.2.post1",
+  "cibuildwheel>=3.3.0",
+  "delocate>=0.13.0",
+  "delvewheel>=1.11.2",
   "twine>=6.1.0",
 ]
 
@@ -55,6 +58,24 @@ version = {attr = "robomaster.version.__version__"}
 
 [tool.robomaster_release]
 distribution = "robomaster-sdk-modern"
-build = "python -m build"
+build = "python -m build --sdist && python -m cibuildwheel --output-dir dist"
 upload = "python -m twine upload dist/*"
 test_upload = "python -m twine upload --repository testpypi dist/*"
+
+[tool.cibuildwheel]
+build = "cp314-*"
+skip = "*-musllinux_*"
+test-command = "python -c \"import libmedia_codec; import robomaster.media; print(libmedia_codec.__name__)\""
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux_2_28"
+before-all = "dnf install -y ffmpeg-free-devel opus-devel"
+
+[tool.cibuildwheel.macos]
+before-all = "brew install ffmpeg opus"
+before-build = "python -m pip install --upgrade delocate"
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+
+[tool.cibuildwheel.windows]
+before-build = "python -m pip install --upgrade delvewheel"
+repair-wheel-command = "delvewheel repair --add-path \"lib\\\\libmedia_codec\\\\src\\\\ffmpeg-dll;lib\\\\libmedia_codec\\\\src\\\\opus-dll\" -w {dest_dir} {wheel}"
