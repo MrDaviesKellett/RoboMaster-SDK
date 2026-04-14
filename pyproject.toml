@@ -63,19 +63,21 @@ upload = "python -m twine upload dist/*"
 test_upload = "python -m twine upload --repository testpypi dist/*"
 
 [tool.cibuildwheel]
+archs = "auto64"
 build = "cp314-*"
 skip = "*-musllinux_*"
 test-command = "python -c \"import libmedia_codec; import robomaster.media; print(libmedia_codec.__name__)\""
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "manylinux_2_28"
-before-all = "dnf install -y ffmpeg-free-devel opus-devel"
+before-all = "dnf install -y pkgconf-pkg-config libavcodec-free-devel libavutil-free-devel libswscale-free-devel opus-devel"
 
 [tool.cibuildwheel.macos]
-before-all = "brew install ffmpeg opus"
+before-all = "brew install pkg-config ffmpeg opus"
 before-build = "python -m pip install --upgrade delocate"
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
 [tool.cibuildwheel.windows]
+archs = "AMD64"
 before-build = "python -m pip install --upgrade delvewheel"
 repair-wheel-command = "delvewheel repair --add-path \"lib\\\\libmedia_codec\\\\src\\\\ffmpeg-dll;lib\\\\libmedia_codec\\\\src\\\\opus-dll\" -w {dest_dir} {wheel}"

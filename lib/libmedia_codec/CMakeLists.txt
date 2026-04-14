@@ -23,5 +23,17 @@ IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 			${FFMEPG_INCLUDE_DIRS} 
 			${OPUS_INCLUDE_DIRS})
 ELSE ()
-	target_link_libraries(libmedia_codec PRIVATE opus avcodec swscale avutil)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(OPUS REQUIRED IMPORTED_TARGET opus)
+	pkg_check_modules(AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
+	pkg_check_modules(AVUTIL REQUIRED IMPORTED_TARGET libavutil)
+	pkg_check_modules(SWSCALE REQUIRED IMPORTED_TARGET libswscale)
+	target_link_libraries(
+		libmedia_codec
+		PRIVATE
+		PkgConfig::OPUS
+		PkgConfig::AVCODEC
+		PkgConfig::AVUTIL
+		PkgConfig::SWSCALE
+	)
 ENDIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
