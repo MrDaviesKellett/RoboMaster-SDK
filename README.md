@@ -26,6 +26,8 @@ Install from PyPI:
 python -m pip install robomaster-sdk-modern
 ```
 
+This is now the canonical install path, including camera/audio media support when a wheel is available for your platform.
+
 Install from a local checkout:
 
 ```bash
@@ -42,8 +44,10 @@ python -m pip install MyQR
 
 Video and audio streaming use the `libmedia_codec` extension module.
 
-- `setup.py` installs the pure-Python package dependencies.
-- `setup_with_lib.py` builds the SDK together with `libmedia_codec`.
+- The default package build now includes `libmedia_codec`.
+- `pip install robomaster-sdk-modern` will install a prebuilt media-enabled wheel when PyPI has one for your platform.
+- If pip falls back to a source build, the standard package build now compiles `libmedia_codec` automatically.
+- `setup_with_lib.py` remains as a compatibility wrapper around the same media-enabled build path.
 - `lib/libmedia_codec` now expects a modern external `pybind11` installation instead of the vendored legacy snapshot.
 
 Build prerequisites for source installs with media support:
@@ -61,7 +65,7 @@ Build prerequisites for source installs with media support:
 
 ## Release workflow
 
-`pyproject.toml` is now the canonical build metadata for the forked distribution.
+`pyproject.toml` is now the canonical build metadata for the forked distribution, including the native media extension.
 
 Build and upload with:
 

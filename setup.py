@@ -9,54 +9,20 @@ and can be quickly used to facilitate learning and teaching. Based on each API i
 there are code examples, you can refer to our developer documentation robomaster-dev.readthedocs.io.
 """
 
-from setuptools import setup, find_packages
-import os.path
-import sys
-if sys.version_info < (3, 14):
-    sys.exit("RoboMaster SDK requires Python 3.14 or later")
+from setuptools import find_packages
+from setuptools import setup
 
-curr = os.path.abspath(os.path.dirname(__file__))
-
-
-def fetch_version():
-    with open(os.path.join(curr, 'src', 'robomaster', 'version.py')) as f:
-        ns = {}
-        exec(f.read(), ns)
-        return ns
+from setup_support import base_setup_kwargs
+from setup_support import ensure_pybind11
+from setup_support import ensure_supported_python
 
 
-version_data = fetch_version()
-version = version_data['__version__']
-
+ensure_supported_python()
+ensure_pybind11()
 
 setup(
-    name='robomaster-sdk-modern',
-    version=version,
-    description="Community-maintained RoboMaster Python SDK fork for Python 3.14+",
     long_description=__doc__,
-    long_description_content_type="text/markdown",
-    author='EDU SDK TEAM',
-    license='Apache License, Version 2.0',
-    zip_safe=True,
-    keywords='dji robomaster sdk robot drone'.split(),
-    url="https://robomaster-dev.rtfd.io/",
-    python_requires=">=3.14",
-    package_dir={'': 'src'},
-    packages=find_packages('src'),
-    package_data={
-      'robomaster': ['LICENSE.txt', 'README.md']
-    },
-    install_requires=[
-        'numpy >= 2.3.4',
-        'opencv-python >= 4.13.0.92',
-        'psutil >= 7.2.2',
-    ],
-    extras_require={
-        'qrcode': ['MyQR >= 2.3.1'],
-    },
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.14',
-    ],
+    packages=find_packages("src"),
+    package_data={"robomaster": ["LICENSE.txt", "README.md"]},
+    **base_setup_kwargs(),
 )

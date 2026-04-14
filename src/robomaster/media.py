@@ -67,7 +67,8 @@ class LiveView(object):
         if libmedia_codec is None:
             raise ImportError(
                 "libmedia_codec is required for RoboMaster audio/video streaming. "
-                "Build it with setup_with_lib.py or install lib/libmedia_codec first."
+                "Install a robomaster-sdk-modern wheel that includes media support, "
+                "or build the package from source with pip so libmedia_codec is compiled locally."
             ) from _MEDIA_CODEC_IMPORT_ERROR
 
     def _ensure_video_decoder(self):

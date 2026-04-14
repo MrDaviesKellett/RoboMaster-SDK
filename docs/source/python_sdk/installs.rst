@@ -43,6 +43,8 @@ RoboMaster SDK 安装
 安装发布到 PyPI 的本 fork 版本，点开开始菜单，在搜索框中输入 ``cmd`` ，在搜索结果中，对着命令提示符程序，单击鼠标右键，菜单中点击选择 ``以管理员身份运行`` ，并输入以下指令::
 
     python -m pip install robomaster-sdk-modern
+
+默认情况下，PyPI 提供的平台 wheel 将直接包含 ``libmedia_codec`` ，可直接使用音视频流功能。
    
 如果网络较差，多次都安装失败，可以尝试::
 
@@ -56,7 +58,8 @@ RoboMaster SDK 安装
 
     python -m pip install MyQR
 
-如需从源码构建音视频流依赖 ``libmedia_codec`` ，请在仓库根目录执行::
+如果 pip 因平台原因退回源码构建，标准安装流程也会自动编译 ``libmedia_codec`` 。
+如需手动兼容旧流程，仍可执行::
 
     python setup_with_lib.py build_ext --inplace
 
@@ -94,6 +97,8 @@ Python 环境安装
 
     python -m pip install robomaster-sdk-modern
 
+如无匹配 wheel，pip 会按源码包自动编译 ``libmedia_codec`` ，因此需要本机安装 CMake、pybind11 以及 FFmpeg/Opus 开发库。
+
 
 
 升级 RoboMaster SDK
@@ -115,6 +120,8 @@ Python 环境安装
 安装RoboMaster SDK，可输入以下指令::
 
     python -m pip install robomaster-sdk-modern
+
+如无匹配 wheel，pip 会按源码包自动编译 ``libmedia_codec`` ，因此需要本机安装 CMake、pybind11 以及 FFmpeg/Opus 开发库。
 
 
 升级 RoboMaster SDK
