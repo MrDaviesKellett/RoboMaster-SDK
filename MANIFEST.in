@@ -1,0 +1,8 @@
+include LICENSE
+include README.md
+include pyproject.toml
+include setup.py
+include setup_with_lib.py
+include setup_support.py
+recursive-include src *
+recursive-include lib/libmedia_codec *

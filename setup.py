@@ -9,8 +9,15 @@ and can be quickly used to facilitate learning and teaching. Based on each API i
 there are code examples, you can refer to our developer documentation robomaster-dev.readthedocs.io.
 """
 
+import os
+import sys
+
 from setuptools import find_packages
 from setuptools import setup
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from setup_support import base_setup_kwargs
 from setup_support import ensure_pybind11
